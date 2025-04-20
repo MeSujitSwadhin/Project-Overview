@@ -1,73 +1,92 @@
-import { motion } from 'framer-motion';
+import { Form } from "@remix-run/react";
 
 interface Field {
     name: string;
     type: string;
     placeholder: string;
-    value: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 interface AuthFormProps {
-    title: string;
-    buttonText: string;
+    heading: string;
     fields: Field[];
-    onSubmit: (e: React.FormEvent) => void;
-    bgColor: string; // Tailwind classes
-    linkText: string;
-    linkHref: string;
+    submitButtonText: string;
+    error?: Record<string, string>;
+    bottomText: string;
+    bottomLinkText: string;
+    bottomLinkHref: string;
+    themeColor?: "green" | "blue";
 }
 
 export default function AuthForm({
-    title,
-    buttonText,
+    heading,
     fields,
-    onSubmit,
-    bgColor,
-    linkText,
-    linkHref,
+    submitButtonText,
+    error,
+    bottomText,
+    bottomLinkText,
+    bottomLinkHref,
+    themeColor = "blue",
 }: AuthFormProps) {
+    const bgGradient =
+        themeColor === "green"
+            ? "bg-gradient-to-r from-green-100 via-white to-green-100"
+            : "bg-gradient-to-r from-blue-100 via-white to-blue-100";
+
+    const buttonBg =
+        themeColor === "green" ? "bg-green-500 hover:bg-green-600" : "bg-blue-500 hover:bg-blue-600";
+
+    const textColor =
+        themeColor === "green" ? "text-green-700" : "text-gray-800";
+
+    const linkColor =
+        themeColor === "green" ? "text-green-500" : "text-blue-500";
+
     return (
-        <div className={`min-h-screen flex items-center justify-center ${bgColor}`}>
-            <form
-                action=''
-                method='post'
-                onSubmit={onSubmit}
+        <div className={`min-h-screen flex items-center justify-center ${bgGradient}`}>
+            <Form
+                method="post"
                 className="bg-white/70 backdrop-blur-md p-10 rounded-3xl shadow-xl w-full max-w-sm space-y-6"
             >
-                <h2 className="text-3xl font-extrabold text-center text-gray-800">{title}</h2>
+                <h2 className={`text-3xl font-extrabold text-center ${textColor}`}>{heading}</h2>
 
                 <div className="space-y-4">
                     {fields.map((field) => (
-                        <input
-                            key={field.name}
-                            name={field.name}
-                            type={field.type}
-                            placeholder={field.placeholder}
-                            value={field.value}
-                            onChange={field.onChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent placeholder-gray-400 text-gray-700"
-                            required
-                        />
+                        <div key={field.name} className="flex flex-col space-y-1">
+                            <input
+                                name={field.name}
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-transparent shadow focus:outline-none focus:ring-1 focus:ring-gray-300 placeholder-gray-400 text-gray-800"
+
+                                required
+                            />
+                            {error?.[field.name] && (
+                                <p className="text-sm text-red-600">{error[field.name]}</p>
+                            )}
+                        </div>
                     ))}
                 </div>
 
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                {error?.general && (
+                    <div className="text-sm text-red-600 text-center">
+                        {error.general}
+                    </div>
+                )}
+
+                <button
                     type="submit"
-                    className="w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-all"
+                    className={`w-full mt-6 ${buttonBg} text-white font-bold py-2 px-6 rounded-full shadow-lg transition-all disabled:opacity-50`}
                 >
-                    {buttonText}
-                </motion.button>
+                    {submitButtonText}
+                </button>
 
                 <p className="text-sm text-center text-gray-600">
-                    {linkText}{" "}
-                    <a href={linkHref} className="text-blue-500 font-medium hover:underline">
-                        {linkHref === "/login" ? "Login" : "Sign up"}
+                    {bottomText}{" "}
+                    <a href={bottomLinkHref} className={`${linkColor} font-medium hover:underline`}>
+                        {bottomLinkText}
                     </a>
                 </p>
-            </form>
+            </Form>
         </div>
     );
 }
